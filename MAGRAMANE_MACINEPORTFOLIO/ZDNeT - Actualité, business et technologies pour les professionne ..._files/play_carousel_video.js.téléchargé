@@ -1,0 +1,84 @@
+function do_play_carousel_video(e, id, type, video_id, video_url) {
+
+    var carousel_gallery = $("#carousel-gallery-generic");
+    carousel_gallery.on('slide.bs.carousel', pause_carousel_in_playin_video);
+    window.current_carousel_video_playing_id = id;
+    $('#carousel-gallery-generic .carousel-content ol li').click(function () {
+        carousel_gallery.unbind('slide.bs.carousel', pause_carousel_in_playin_video);
+        carousel_gallery.carousel('cycle');
+        var current_id = window.current_carousel_video_playing_id;
+        if(Object.keys(DM.Player._INSTANCES).length && DM.Player._INSTANCES[current_id]){
+            var player = DM.Player._INSTANCES[current_id];
+            player.addEventListener("play", function(){
+                window.current_carousel_video_playing_id = current_id;
+                carousel_gallery.on('slide.bs.carousel', pause_carousel_in_playin_video);
+            });
+            player.pause();
+        }else if(typeof(videojs) != 'undefined' && videojs.players[current_id]){
+            var player = videojs.players[current_id];
+            player.on("play", function(){
+                window.current_carousel_video_playing_id = current_id;
+                carousel_gallery.on('slide.bs.carousel', pause_carousel_in_playin_video);
+            });
+            player.pause();
+        }
+
+    });
+
+    $(e.target).next('div.carousel-caption').hide();
+    $(e.target).hide();
+
+    param = {
+        mediaid : video_url
+    };
+    var height = $(e.target).height();
+    var width = $(e.target).width();
+
+    if (type == 'youtube') {
+        param = {
+            youtube_id: video_id,
+            mediaid : 'https://www.youtube.com/watch?v='+video_id
+        }
+        var setup = {
+            autoplay: true,
+            height: height,
+            width: width,
+            src : video_url,
+            techOrder: ["youtube","flash"],
+            playsinline:true,
+            ytcontrols:1,
+        };
+    } else if (type == 'dailymotion') {
+        param = {
+            dailymotion_id: video_id,
+            mediaid : site_config_js.SITE_SCHEME + '://dai.ly/'+video_id,
+            height: height,
+            width: width,
+            params : {
+                autoplay : true
+            }
+        }
+    }
+
+    var url_template = site_config_js.url_template;
+    var id_pub = site_config_js.id_pub;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    if(site_config_js.devs.passage_du_player_sur_jw6_111776366){
+        var setup = {
+            autoplay:true
+        };
+        if(height){
+            setup.height = height ;
+        }
+        show_jw_player(id, setup, url_template, id_pub, type, param);
+    }else if (type == 'youtube' && site_config_js.devs.Passage_du_player_sur_videojs){
+        $("#"+id).addClass('video-js vjs-default-skin vjs-big-play-centered');
+        show_videojs(id, setup, url_template, id_pub, type, param);
+    }else{
+        show_video(id, url_template, id_pub, type, "", true, param);
+    }
+
+    return false;
+}

@@ -1,0 +1,71 @@
+$(document).ready(function (){
+    initPlayerMostPopularVideo();
+    load_video();
+});
+
+function initPlayerMostPopularVideo() {
+    $(".thumb-video .second-article").on("click", function(){
+        $(".thumb-video .second-article.first").parents(".thumb-video").removeClass("hide");
+        $(".thumb-video .second-article.first").removeClass("first");
+        $(this).parents(".thumb-video").addClass('hide');
+        $(this).addClass('first');
+
+        // change href and title of the current video.
+        $(".main-article-title").text($(this).attr("title"));
+        $(".main-article-title").parents("a:first").attr("href", $(this).data("link"));
+
+        // get type and id of the current video
+        var type = $(this).data("type");
+        var video_id = $(this).data("video");
+
+        // reload video on player
+        playVideoOnPopularArticle("player_most_popular", type, video_id);
+        return false;
+    });
+
+    $(".thumb-video .second-article.first").click();
+}
+/**
+ * gather video details and play video on player
+ */
+function playVideoOnPopularArticle( block_id, type, video_id) {
+    param = {};
+    if (type == 'youtube') {
+        param = {
+            youtube_id: video_id
+        };
+        $("#"+block_id).attr("href", "api:"+video_id);
+    } else if (type == 'dailymotion') {
+        param = {
+            dailymotion_id: video_id,
+            url : site_config_js.SITE_SCHEME + '://dai.ly/'+video_id
+        };
+    }
+
+    var url_template = site_config_js.url_template;
+    var id_pub = site_config_js.id_pub;
+
+    $("#"+block_id).html("");
+    show_video(block_id, url_template, id_pub, type, "", true, param);
+
+    return false;
+}
+
+function load_video() {
+
+    $('.widget_most_popular_videos .row .col-xs-6 .img-title').unbind();
+    $('.widget_most_popular_videos .row .col-xs-6 .img-title').bind("click", function() {
+        var video_html = $(this).parents('.col-xs-6').find('.items-posts').html();
+        $('.widget_most_popular_videos .large-player').html('<div class="items-posts">'+video_html+'</div>');
+        $('.widget_most_popular_videos .row .col-xs-6').removeClass('hidden');
+        $(this).parents('.col-xs-6').addClass('hidden');
+    });
+
+    $("#blockRight .list-ms-item>aside").each(function(i,obj){
+        if($(obj).find('.textwidget>div').hasClass('widget_most_popular_videos')) {
+            var list_videos = $('.widget_most_popular_videos .row').children('.col-xs-6');
+            $(list_videos[0]).find('.img-title').click();
+            return false;
+        }
+    });
+}

@@ -1,0 +1,173 @@
+
+function isInt(x) {
+   return x % 1 === 0;
+}
+
+(function($) {
+
+	rw_share = {
+		isset :function (v){
+		    return ( typeof(v) !== 'undefined') ;
+		},
+		update_count :function (key, value ){
+			rw_share_count = self.rw_share_count || {update:false , Twitter:0 } ;
+			do_update = ( (typeof (value) === 'object' )? value.total_count : value ) ;
+			rw_share_count[key] = value ;
+			if (do_update != 0 ){
+				rw_share_count.update = true ;
+			}
+			$( document ).trigger( "share_count" );
+		},
+		init :function (url){
+			var url = url || self.location.href.split('#')[0];
+			url = url.split('?')[0];
+
+			if(site_config_js.sharedcount_ready){
+				/*if (site_config_js.devs.network_bug_compteur_partage_128927283) {
+					$.getJSON("https://graph.facebook.com/?ids="+url ,
+					    function(data) {
+					    	data = data[url]["share"];
+							var facebook = {} ;
+							for(i in data){
+								if(rw_share.isset (data[i]) && rw_share.isset(site_config_js.sharedcount.Facebook[i])){
+									facebook[i] = data[i] - site_config_js.sharedcount.Facebook[i];
+								}
+							}
+
+							facebook.share_count = rw_share.isset(facebook.share_count) ? facebook.share_count : 0;
+							facebook.total_count = facebook.share_count;
+
+							rw_share.update_count('Facebook', facebook ) ;
+						}).fail(function() {
+							rw_share.update_count('Facebook', 0 );
+				  		}
+				  	);
+				} else {
+					$.getJSON("https://api.facebook.com/method/links.getStats?urls="+url+"&format=json",
+					    function(data) {
+
+							var facebook = {} ;
+							for(i in data[0]){
+
+								if(rw_share.isset (data[0][i]) && rw_share.isset(site_config_js.sharedcount.Facebook[i])){		
+									facebook[i] = data[0][i] - site_config_js.sharedcount.Facebook[i];	
+								}
+							}
+							rw_share.update_count('Facebook', facebook ) ;
+
+						}).fail(function() {
+							rw_share.update_count('Facebook', 0 );
+				  		}
+				  	);
+				}*/
+
+			    /* $.getJSON("http://cdn.api.twitter.com/1/urls/count.json?callback=?&url=" + url,
+				    function(data) {
+						var twitter = data.count - site_config_js.sharedcount.Twitter;
+						rw_share.update_count('Twitter', twitter );
+					}).fail(function() {
+						rw_share.update_count('Twitter', 0);
+			  		}
+			  	);	*/
+
+			  	$.ajax({    
+				    type: "GET",
+				    crossDomain:true,
+				    url: "//api.pinterest.com/v1/urls/count.json?url=" + url,
+				    dataType: "jsonp"
+				    
+				}).done(function(data){
+					if(rw_share.isset(data.count)){
+						var pinterest = data.count - site_config_js.sharedcount.Pinterest;
+						rw_share.update_count('Pinterest', pinterest);
+					}else{
+						rw_share.update_count('Pinterest', 0);
+					}
+				}).fail(function() {
+					rw_share.update_count('Pinterest', 0);
+				});
+
+			  	/*$.ajax({    
+				    type: "POST",
+				    data: '[{"jsonrpc":"2.0","id":"gapiRpc","method":"pos.plusones.get","apiVersion":"v1","params":{"nolog":true,"id":"'+ url +'","source":"widget","userId":"@viewer","groupId":"@self"}}]',
+				    url: "https://clients6.google.com/rpc?key=AIzaSyCKSbrvQasunBoV16zDH9R33D88CeLr9gQ",
+				    dataType: "json",
+				    contentType: "application/json; charset=utf-8"
+				}).done(function(data){
+					var googlePlusOne = data[0].result.metadata.globalCounts.count - site_config_js.sharedcount.GooglePlusOne;
+					rw_share.update_count('GooglePlusOne', googlePlusOne);
+				}).fail(function() {
+					rw_share.update_count('GooglePlusOne', 0);
+			  	});*/
+
+			  	// fix erreur JSON-RPC protocol support is deprecated. See https://g.co/cloud/global-batch-deprecation
+
+
+
+
+				$( document ).trigger( "do_share_count" , rw_share  ); 
+
+				$(document ).unbind('share_count').on( "share_count" , function(){
+					
+					rw_share.can_update = rw_share.isset(rw_share_count.Facebook) && rw_share.isset(rw_share_count.Twitter) /*&& rw_share.isset(rw_share_count.GooglePlusOne)*/ && rw_share.isset(rw_share_count.Pinterest);       
+					if( rw_share.can_update ){
+
+						$( document ).trigger( "can_update_share" , rw_share ); 
+						
+						if ( !rw_share.can_update )
+							return false;
+
+						if( rw_share_count.update ){
+							$.ajax({    
+								type: "GET",
+								url: "/?sharecount_update=1&post_id=" + site_config_js.post_id + "&hash=" + site_config_js.sharedcount.hash ,
+								dataType: "json",
+								data:rw_share_count  
+							});							
+						}
+						// TODO : test if
+						var old_count = site_config_js.sharedcount.Facebook.total_count+site_config_js.sharedcount.Twitter+site_config_js.sharedcount.GooglePlusOne+site_config_js.sharedcount.Pinterest;
+						if(site_config_js.is_preprod == 1){
+							var countShare = 10;
+						}else{
+							var countShare = old_count + rw_share_count.Facebook.total_count + rw_share_count.Twitter + rw_share_count.GooglePlusOne + rw_share_count.Pinterest;
+						}
+
+
+						if(isInt( countShare)){
+							$('.num_share em').text(countShare);
+
+							$('.total-shares').each(function(){
+								var $this = $(this),
+								$elemCount=$('.num_share em',$this);
+								labelShare = ' '+RW_Terms.Partages;
+								if(countShare > 0){
+									txtcountShare = (countShare>=10000)?(countShare/10000).toFixed(1) + 'k':countShare;
+									$elemCount.text(txtcountShare);
+									if(txtcountShare == 1) {
+										labelShare = ' '+RW_Terms.Partage;
+									}
+									$('.detailed_publication_infos .nbr_share_post').text(txtcountShare+labelShare);
+								}
+								$('.num_share .caption',$this).text(labelShare);
+								if(parseInt($elemCount.text()) > 1){
+									//$this.show();
+									$this.css({'display' : 'inline-block'});
+								}
+							});
+							if(!site_config_js.devs.disable_sharer_size && typeof calc_new_sharer_size !== 'undefined'){
+								calc_new_sharer_size();
+							}
+							
+						}
+
+					}
+				});
+			}
+		}
+		
+	}
+	$(document).ready(function(){
+		rw_share.init();
+	});
+})(jQuery);

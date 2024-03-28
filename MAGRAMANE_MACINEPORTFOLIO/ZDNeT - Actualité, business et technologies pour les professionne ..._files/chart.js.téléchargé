@@ -1,0 +1,82 @@
+google.charts.load("visualization", "1", { packages: ["corechart", "gauge", "geochart", "table", "treemap"], language: "fr" });
+
+document.addEventListener("DOMContentLoaded", function () {
+	const charts = document.querySelectorAll("div.chart");
+	const chartBoxes = [];
+	charts.forEach((element) => {
+		let product_id = element.id.split("_")[1];
+		let chartService = fetch(`/services/chart/data.htm?product_id=${product_id}`);
+		chartService
+			.then((response) => response.json())
+			.then((data) => {
+				const chartData = data;
+				if (chartData.length !== 0) {
+					element.style.height = "50vh";
+					chartBoxes[chartData.id] = chartData;
+					chart.loopCharts(chartBoxes);
+					return;
+				}
+			})
+			.catch(() => {
+				console.error("CHART Request Failed ");
+			})
+			.finally(() => {});
+	});
+});
+var chart = {
+	loopCharts: (data) => {
+		data.forEach((el) => {
+			let firstLine = el.data[0].length;
+			let fixed_line = el.data.map((lineData) => {
+				if (lineData.length < firstLine) {
+					let len = firstLine - lineData.length;
+					let fillData = new Array(len).fill("");
+					return lineData.concat(fillData);
+				} else {
+					return lineData;
+				}
+			});
+			google.charts.setOnLoadCallback(chart.drawChart(el.type, el.id, fixed_line, el.options));
+		});
+	},
+	drawChart: function (type, id, data, options) {
+		var chart_data = google.visualization.arrayToDataTable(data);
+		var chart_options = options;
+		var full_chart = chart.getChart(type, id);
+		full_chart.draw(chart_data, chart_options);
+	},
+
+	getChart: function (type, id) {
+		var id_container = "graph_" + id;
+
+		if (type == "area") {
+			return new google.visualization.AreaChart(document.getElementById(id_container));
+		} else if (type == "bar") {
+			return new google.visualization.BarChart(document.getElementById(id_container));
+		} else if (type == "bubble") {
+			return new google.visualization.BubbleChart(document.getElementById(id_container));
+		} else if (type == "candle") {
+			return new google.visualization.CandlestickChart(document.getElementById(id_container));
+		} else if (type == "column") {
+			return new google.visualization.ColumnChart(document.getElementById(id_container));
+		} else if (type == "combo") {
+			return new google.visualization.ComboChart(document.getElementById(id_container));
+		} else if (type == "gauge") {
+			return new google.visualization.Gauge(document.getElementById(id_container));
+		} else if (type == "geo") {
+			return new google.visualization.GeoChart(document.getElementById(id_container));
+		} else if (type == "line") {
+			return new google.visualization.LineChart(document.getElementById(id_container));
+		} else if (type == "pie") {
+			return new google.visualization.PieChart(document.getElementById(id_container));
+		} else if (type == "scatter") {
+			return new google.visualization.ScatterChart(document.getElementById(id_container));
+		} else if (type == "stepped") {
+			return new google.visualization.SteppedAreaChart(document.getElementById(id_container));
+		} else if (type == "table") {
+			return new google.visualization.Table(document.getElementById(id_container));
+		} else if (type == "tree") {
+			return new google.visualization.TreeMap(document.getElementById(id_container));
+		}
+	},
+};

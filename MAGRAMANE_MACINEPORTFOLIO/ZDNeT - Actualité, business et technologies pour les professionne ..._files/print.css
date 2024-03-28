@@ -1,0 +1,103 @@
+.print_btn{
+	display: none;
+}
+#body_block,body{
+	background: none;
+	background-color: #ffffff !important;
+}
+
+footer,#barreTopInfo,.blockSearch,#Pub-magazine-logo,nav,#container #blockRight,.breadcrumb,.div_rating_key,.homeMoreArticles, #comments,#mb_container,.date_recette/* ,#content #results .link_cat */,.blockShare,#ligatusframe_48937,.OUTBRAIN, .blockShare_single,.block_diapo .list_thumbs,header .navbar-brand .main-logo, .video-pub-post,#megabanner_top, #megabanner_bottom,.comment-btn,#footersite,#rw_alert_cookies,.block_diapo .navs,.block_diapo:before,iframe,header .navbar-sociallink,.article-context-produit,.block-ligatus,.legend_picture .info_play{
+	display: none !important;
+}
+
+#container #content {
+	width: 100%;
+}
+.site-content #content .results.post .thecontent .recette_right,.site-content #content .results.post .thecontent .recette_left{
+	float: none;
+	display: block;
+	width: 100%;
+	overflow: hidden;
+	clear: both;
+}
+#content #results .thecontent .recette_right a img{
+	display: block;
+	margin: 14px auto;
+}
+body #page{
+	width: 100%;
+	margin: 0px 0px;
+}
+body #page .center,header .header-left{
+	width: 100%;
+}
+
+header .header-left .logo{
+	margin: 0px 0px;
+}
+
+#container{
+	overflow: hidden;
+	padding: 0px;
+}
+
+body #page .center{
+	width: 90%;
+}
+header{
+	border-bottom: 2px solid #f5b324;
+}
+
+#print_note{
+	display: block;
+}
+
+ 
+a[href]:after {
+    content: "";
+}
+
+
+.widget-title, .default-title{
+	border: none;
+}
+
+header .navbar-brand .main-logo-print{
+	display: inline;
+}
+	
+
+.large-diapo .block_diapo {
+	float: right;
+}
+.large-diapo .widgetLegende {
+	float: left;
+}
+
+.last-posts-author .visu-author .img-responsive {
+	width: auto;
+}
+
+header .navbar-brand {
+	margin-bottom: 20px;
+}
+
+header .container {
+	height: auto;
+	line-height: auto;
+}
+.last-posts-author > div{
+	float: left;
+	width: 50%;
+}
+.last-posts-author .info .visu-author {
+	width: 25%;
+	float: left;
+}
+.last-posts-author .info .posts-author {
+	width: 75%;
+	float: left;
+}
+
+
+

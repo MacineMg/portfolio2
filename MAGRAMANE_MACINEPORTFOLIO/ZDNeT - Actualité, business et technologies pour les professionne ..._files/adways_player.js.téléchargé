@@ -1,0 +1,19 @@
+function show_adways_player(id_block, params){
+
+    var width = params.width || '1OO%' ;
+    var height = params.height || '100%' ;
+    var autoplay = params.autoplay || false;
+    var src = params.src  ;
+    if(autoplay){
+        src += '?autoplay=true'
+    }else{
+        src += '?autoplay=false'
+    }
+    var $ifram = jQuery('<iframe>');
+    $ifram.attr({
+        'width' :width,
+        'height' :height,
+        'src' :src
+    }) ;
+    jQuery('#' + id_block).html($ifram) ;
+}

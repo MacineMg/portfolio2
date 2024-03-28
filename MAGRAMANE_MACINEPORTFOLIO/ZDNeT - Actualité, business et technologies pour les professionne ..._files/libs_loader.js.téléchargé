@@ -1,0 +1,21 @@
+var loadedlibs= [];
+function loadlib(lib_key, callback) {
+    if(typeof loadedlibs[lib_key] == 'undefined' || loadedlibs[lib_key]===false){
+        if(site_config_js[lib_key]){
+            jQuery.getScript(site_config_js[lib_key],function (){
+                loadedlibs[lib_key] = true;
+                if(typeof callback == 'function'){
+                    callback();
+                }
+            });
+        } else {
+            if(typeof callback == 'function'){
+                callback();
+            }
+        }
+    }else{
+        if(typeof callback == 'function'){
+            callback();
+        }
+    }
+}
