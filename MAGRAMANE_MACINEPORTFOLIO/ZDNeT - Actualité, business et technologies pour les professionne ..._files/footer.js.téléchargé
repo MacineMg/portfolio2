@@ -1,0 +1,30 @@
+
+ (function($){
+
+ 	function masonryFooter() {
+ 		if(window.Masonry){
+ 			var container = document.querySelector('footer>.container');
+	 		if( container ){
+	 			var msnry_options = {
+					itemSelector: '.ms-item',
+					columnWidth: '.ms-item',
+				};
+				if( $('body').hasClass('rtl') ) {
+					msnry_options.isOriginLeft = false;
+				}
+				var msnry = new Masonry( container, msnry_options);
+			}
+		}
+ 	}
+ 	 	
+ 	jQuery(document).ready(function(){	
+		masonryFooter();
+	});
+
+
+ })(jQuery);
+
+
+
+
+

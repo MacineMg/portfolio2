@@ -1,0 +1,153 @@
+var ipc; var ips; var ipt; var companyInfo;
+console.log("starting GetQuanty analysis");
+
+var siteid='101344528';
+var GQ_email='';
+
+	
+	
+var gq_data={ 
+gq_email : "", 
+gq_domain: "",
+gq_domains: "",
+gq_goals: "",
+gq_company :"",
+qq_nafcode: "",
+gq_nafcode: "",
+gq_naflabel : "",
+gq_turnover : "",
+gq_size : "",
+gq_jurform : "",
+gq_type : "",
+gq_segment : "",
+gq_segment_category : "",
+gq_category : "",
+gq_scoring : "",
+gq_siren : "",
+gq_address : "",
+gq_siret : "",
+gq_phone : "",
+gq_zipcode : "",
+gq_city : "",
+gq_country : "",
+gq_siteid : "101344528",
+gq_userid : "4BE836C6-8B99-3874-1F7A-D90019D9983C",
+gq_sessid : "9F93AFD8-BBB3-A06D-2694-F3EEE9EC2CBA",
+gq_keywords : "cybersécurité,mac,sécurité informatique,télécoms,transformation digitale,informatiques,datacenter,cybercriminels,livres blancs,serveurs",
+gq_client : "",
+gq_url : "https://www.zdnet.fr/",
+gq_page : "ZDNeT - Actualité, business et technologies pour les professionne ...",
+gq_os : "",
+gq_referer : "",
+gq_campaign :"",
+gq_source : "",
+gq_medium : "",
+gq_content : "",
+gq_dept : ""
+};
+
+var gq_goals=GQget_cookie("gq_goals");
+if( gq_goals) gq_data.gq_goals=gq_goals.substring(0,255);
+
+var now = new Date();
+gq_data.gq_daytime =now.getHours();
+gq_data.gq_weekday =now.getDay();
+
+
+if (localStorage.getItem("gq_nb_session")) gq_data.gq_nb_session= parseInt(localStorage.getItem("gq_nb_session"))+1; else gq_data.gq_nb_session=1;
+
+if (localStorage.getItem("gq_segment") && gq_data.gq_segment!=localStorage.getItem("gq_segment")) gq_data.gq_segment_changed=1;
+if (localStorage.getItem("gq_scoring") && gq_data.gq_scoring!=localStorage.getItem("gq_scoring")) gq_data.gq_scoring_changed=1;
+
+localStorage.setItem("gq_nb_session",gq_data.gq_nb_session);
+localStorage.setItem("gq_scoring",gq_data.gq_scoring);                            
+localStorage.setItem("gq_segment",gq_data.gq_segment);                            
+
+
+if(sessionStorage.getItem("gq_nb_pages")) gq_data.gq_nb_pages= parseInt(sessionStorage.getItem("gq_nb_pages"))+1; else gq_data.gq_nb_pages=1;
+sessionStorage.setItem("gq_nb_pages",gq_data.gq_nb_pages);
+var push_data={};
+push_data=gq_data;
+
+
+
+
+function scoring_done(evt){
+
+           
+      if ( typeof window["dataLayer"]==='undefined' ){
+                dataLayer = [];
+                }
+       
+       
+       if (!gq_data) {
+       companyInfo ={};
+       gq_data={gq_company:''};
+       
+       }
+       
+     
+    
+    
+    
+    
+
+
+
+       
+     
+     
+    
+       
+    
+       
+       
+              
+       
+         try {
+               gq_data=push_data;
+            
+               dataLayer.push({
+                event: 'scoring_done','gq_data':push_data
+                });
+
+                
+                } catch(e) { console.log(e);}
+                
+        
+                    
+        console.log('scoring_done');
+        
+
+
+
+        
+        
+            
+var show= document.getElementsByClassName("GQShow");
+var hide= document.getElementsByClassName("GQHide");       
+   
+        
+           
+         
+         
+         
+         
+       
+            
+            // add custom call here    
+                
+            }
+scoring_done();
+
+var gq_event = document.createEvent('Event');
+gq_event.initEvent('scoring_done', true, true);
+window.dispatchEvent(gq_event);
+
+
+
+//newsession
+ 
+//tracking live
+
+//end

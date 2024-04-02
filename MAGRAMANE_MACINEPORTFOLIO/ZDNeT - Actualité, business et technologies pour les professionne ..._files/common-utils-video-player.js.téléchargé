@@ -1,0 +1,38 @@
+function show_videojs(id_block, setup_origin, url_template, pub_ads, type_provider, config_params) {
+    do_show_videojs(id_block, setup_origin, url_template, pub_ads, type_provider, config_params);
+}
+
+function show_video(id_block, url_template, pub_ads, type_provider, src_splash, autoPlay, config_params) {
+    do_show_video(id_block, url_template, pub_ads, type_provider, src_splash, autoPlay, config_params);
+}
+
+function show_dai_video(id_block, params, pub_ads) {
+    do_show_dai_video(id_block, params, pub_ads);
+}
+
+function mobile_first_play($player, $el, type) {
+    do_mobile_first_play($player, $el, type);
+}
+
+function playlist(id, s, p, prov, pub_ads) {
+    do_playlist(id, s, p, prov, pub_ads);
+}
+
+function play_selected_video(response, prov, p, s, id, pub_ads) {
+    do_play_selected_video(response, prov, p, s, id, pub_ads);
+}
+
+function play_on_click(player, is_right_video, type) {
+    do_play_on_click(player, is_right_video, type);
+}
+
+function play_carousel_video(e, id, type, video_id, video_url) {
+    do_play_carousel_video(e, id, type, video_id, video_url);
+}
+
+function init_nouveau_player_dailymotion(id_bloc,id_video,params){
+    dailymotion.createPlayer(id_bloc, {
+        video: id_video,
+        params: params,
+    });
+}

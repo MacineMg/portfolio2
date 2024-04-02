@@ -1,0 +1,199 @@
+function show_jw_player(id_block, setup, url_template, pub_ads, type_provider, config_params ) {
+
+    if(type_provider == 'dailymotion'){
+        var params = {
+            "video" : config_params.dailymotion_id ,
+            "width" : "100%"
+        } ;
+        if(setup.autoplay) {
+            params['params'] = {autoplay:true};
+        }
+
+        if(setup.width){
+            setup.width = setup.width +"" ;
+            params.width = setup.width.replace('px','');
+        }
+        if(setup.height){
+            setup.height = setup.height +"" ;
+            params.height =  setup.height.replace('px','');
+        }
+
+        if( config_params.next === true ){
+            params.next = true;
+        }
+
+        show_dai_video(id_block, params, pub_ads) ;
+        return ;
+    }else if(config_params.mediaid.indexOf('adways.com') > -1){
+
+        var params = {
+            "width" : "100%",
+            "src" : config_params.mediaid
+        } ;
+
+        if(setup.width){
+            params.width = setup.width ;
+        }else{
+            params.width = jQuery("#" + id_block).parent().width();
+        }
+        if(setup.width){
+            params.width = setup.width ;
+        }else{
+            params.width = jQuery("#" + id_block).parent().width();
+        }
+
+        if(setup.height){
+            params.height = setup.height ;
+        }else{
+            params.height = params.width * 390/460 ;
+        }
+
+        show_adways_player(id_block, params) ;
+        return ;
+    }
+
+    jwplayer.key= site_config_js.jwplayer_key;
+
+    var videoPlayer = 'Jw video player';
+    var videoId = '';
+    if(type_provider == "youtube"){
+        videoId = config_params.youtube_id;
+    }
+    var tracking_Params = {
+        'videoId' : videoId,
+        'videoName' : '',
+        'videoPlayer' : videoPlayer,
+        'type_provider' : type_provider
+    };
+
+    playerInstance = jwplayer(id_block);
+    var plugin_liverail = url_template + '/assets/jwplayer/LiveRail.AdManager.JWPlayer-6.8.1.plugin.js' ;
+    var plugin_sticky = site_config_js.SITE_SCHEME + "://cdn.stickyadstv.com/plugins/jw/StickyJW6Plugin.js" ;
+    plugins = {} ;
+
+    if (pub_ads && !pub_ads.type) {
+
+        plugins[plugin_sticky] = {
+            remainingAdTime:"This advertisement runs for [sec] seconds",
+            ads:{
+                zones:{
+                    preroll: pub_ads.prerollZoneId || -1 ,
+                    midroll:  pub_ads.midrollZoneId || -1 ,
+                    postroll:  pub_ads.postrollZoneId || -1 ,
+                },
+            }
+        } ;
+
+    }else if(pub_ads && pub_ads.liverail){
+        plugins[plugin_liverail] = pub_ads.liverail;
+    }
+
+    var setup_player = {
+        plugins: plugins ,
+        flashplayer: url_template +'/assets/jwplayer/jwplayer.flash.swf',
+        file:  config_params.mediaid,
+        width: '100%'
+    };
+    if(!setup.noflash){
+        setup_player.primary =  'flash';
+    }
+
+    if(setup.autoplay){
+        setup_player.autostart = true ;
+    }
+    if(setup.repeat){
+        setup_player.repeat = true;
+    }
+
+    if(setup.width){
+        setup.width = setup.width +"" ;
+        setup_player.width = setup.width.replace('px','');
+    }
+
+    if(setup.aspectratio){
+        setup_player.aspectratio = setup.aspectratio ;
+    }else if(setup.height){
+        setup.height = setup.height +"" ;
+        setup_player.height =  setup.height.replace('px','');
+    }
+    if(setup.src_img){
+        setup_player.image =  setup.src_img;
+    }
+    if(setup.muted){
+        setup_player.mute =  true;
+    }
+
+    playerInstance.setup(setup_player);
+
+    //Start code added for tracking video
+    jwplayer(id_block).onReady( function(){
+        var prsentPoint = [];
+        nextPoint = 0;
+        jwplayer(id_block).onPlay( function(event){
+            if(!prsentPoint.length){
+                videoDuration = this.getDuration();
+                prsentPoint.push({'prsent':0, 'time':0, 'state':false});
+                prsentPoint.push({'prsent':25, 'time':videoDuration*(0.25), 'state':false});
+                prsentPoint.push({'prsent':50, 'time':videoDuration*(0.50), 'state':false});
+                prsentPoint.push({'prsent':75, 'time':videoDuration*(0.75), 'state':false});
+            }else{
+                tracking_Params.event = 'Play';
+                $(document).trigger('video_state_tracking', tracking_Params);
+            }
+        });
+
+        jwplayer(id_block).onSeek( function(event){
+            currentTime = event.offset;
+            for(j=0; j<prsentPoint.length; j++){
+                if( currentTime > prsentPoint[j].time){
+                    prsentPoint[j].state = true;
+                    nextPoint = j+1;
+                }else{
+                    prsentPoint[j].state = false;
+                }
+            }
+            tracking_Params.event = 'Seek';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        });
+
+        jwplayer(id_block).onTime( function(event){
+            var currentTime = event.position;
+            if(prsentPoint[nextPoint]+"" != "undefined" && currentTime > prsentPoint[nextPoint].time && !prsentPoint[nextPoint].state){
+                prsentPoint[nextPoint].state = true;
+                var currentPrsentPoint = prsentPoint[nextPoint].prsent;
+                tracking_Params.event = currentPrsentPoint;
+                $(document).trigger('video_state_tracking', tracking_Params);
+                nextPoint++;
+            }
+        });
+
+        jwplayer(id_block).onPause( function(){
+            tracking_Params.event = 'Pause';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        });
+
+        jwplayer(id_block).onComplete( function(){
+            tracking_Params.event = 'End';
+            $(document).trigger('video_state_tracking', tracking_Params);
+            if(setup.autoloop){
+                show_jw_player(id_block, setup, url_template, pub_ads, type_provider, config_params);
+            }
+            if( config_params.next === true ){
+                next_video_playlist(id_block);
+            }
+        });
+
+        /*jwplayer(id_block).onMute( function(event){
+            if(event.mute){
+                tracking_Params.event = 'Mute';
+                $(document).trigger('video_state_tracking', tracking_Params);
+            }
+        });*/
+
+        jwplayer(id_block).onError( function(){
+            tracking_Params.event = 'Error';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        });
+    });
+    //End code added for tracking video
+}

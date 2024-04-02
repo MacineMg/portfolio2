@@ -1,0 +1,152 @@
+// to stock all player
+var playerInfoList =[] ;
+
+var playersList = {};
+
+var script_is_loaded = false;
+// to init script
+function show_all_youtube(youtube_players){
+    if(!script_is_loaded) {
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        playerInfoList = youtube_players;
+
+    } else {
+        var length = youtube_players.length;
+        createPlayer(youtube_players[length-1]);
+    }
+
+}
+
+var youtube_players=[];
+
+/* ======================  google analytics player ========================== */
+function show_youtube(player, videoId, width, height){
+    self.param_youtube = { 'player':player, 'videoId':videoId, 'width':width, 'height':height};
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+}
+
+
+// to create iframe for each player
+function onYouTubeIframeAPIReady() {
+    if(typeof playerInfoList === 'undefined')
+        return;
+
+    for(var i = 0; i < playerInfoList.length;i++) {
+        var curplayer = createPlayer(playerInfoList[i]);
+    }
+
+    script_is_loaded = true;
+}
+
+function createPlayer(playerInfo) {
+
+    var curplayer =  new YT.Player(playerInfo.id_block, {
+        height: playerInfo.height,
+        width: playerInfo.width,
+        videoId: playerInfo.yt_id,
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange,
+            'onVolumeChange': onPlayerSolumeChange,
+        }
+    });
+    playersList[playerInfo.id_block] = curplayer;
+    return curplayer;
+}
+
+
+// 4. The API will call this function when the video player is ready.
+function onPlayerReady(event) {
+    send_stats_youtube('Start') ;
+}
+
+// 5. The API calls this function when the player's state changes.
+//    The function indicates that when playing a video (state=1),
+//    the player should play for six seconds and then stop.
+var youtube_ga_done = false;
+function onPlayerStateChange(event) {
+    console.log(event );
+    if (event.data == YT.PlayerState.PAUSED){
+        send_stats_youtube('Pause') ;
+    }else if(event.data == YT.PlayerState.ENDED){
+        send_stats_youtube('Finish') ;
+    }
+
+    if (event.data == YT.PlayerState.PLAYING && !youtube_ga_done) {
+        if(event.target.A.currentTime > 0){
+            send_stats_youtube('Resume') ;
+        }
+
+
+        // setTimeout(stopVideo, 6000);
+        //done = true;
+    }
+}
+
+function stopVideo() {
+    youtube_ga_player.stopVideo();
+}
+
+function onPlayerSolumeChange(event) {
+    console.log(event );
+    if(event.data.volume === undefined && event.data.muted === false){
+        //send_stats_youtube('Mute') ;
+    }
+
+}
+
+function send_stats_youtube(label){
+    console.log(label);
+    setTimeout(function(){
+        if ((!typeof site_config_js.devs.supprimer_GA_events_10725 !== 'undefined') && !site_config_js.devs.supprimer_GA_events_10725) {
+            send_GA( 'Video player YT', label, self.location.href);
+        }
+    }, 3000);
+}
+
+function start_current_video_diapo(obj) {
+    var player_id = $(obj).parent().find('.video_post .fwplayer_block ').attr("id");
+
+    if(playersList!== null && playersList[player_id] !== null) {
+        playersList[player_id].playVideo();
+    }
+    return player_id;
+}
+
+/* ====================== END : google analytics player ====================== */
+
+function sendEvent(e, event_name) {
+    if ( e == 'adwizz' || e.provider == "youtube" || e.provider == "dailymotion" ) {
+        //$f().getPlugin("gatracker").trackEvent(event_name);
+        var videoPlayer  = 'Video player';
+        var tracking_Params = {
+            'event' : event_name,
+            'videoPlayer'  : videoPlayer
+        };
+        if ((!typeof site_config_js.devs.supprimer_GA_events_10725 !== 'undefined') && !site_config_js.devs.supprimer_GA_events_10725) {
+            $(document).trigger('video_state_tracking', tracking_Params);
+        }
+    }
+}
+// Param global pour identifier que c'est une playlist sidebar sur IE
+isIE_pl = false;
+
+function pause_carousel_in_playin_video(){
+    $("#carousel-gallery-generic").carousel('pause');
+    return false;
+}
+
+function init_nouveau_player_dailymotion(id_bloc,id_video,params){
+    dailymotion.createPlayer(id_bloc, {
+        video: id_video,
+        params: params,
+    });
+}

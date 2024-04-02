@@ -1,0 +1,306 @@
+function do_show_dai_video(id_block, params, pub_ads){
+
+    if(typeof site_config_js.disable_show_dai_video_on_scroll === 'undefined' ||
+        !site_config_js.disable_show_dai_video_on_scroll) {
+
+        scroll_video_ready = window.scroll_video_ready ||{} ;
+        $_window = window.$_window ||  jQuery(window) ;
+
+        if( Object.keys(scroll_video_ready).length == 0){
+            $_window.scroll(function(){
+                if( ! scroll_video_ready[id_block] && $_window.scrollTop() > 201 ){
+                    scroll_video_ready[id_block] = true ;
+                    show_dai_video_origin(id_block, params, pub_ads);
+                }
+            });
+        }else{
+            show_dai_video_origin(id_block, params, pub_ads);
+        }
+
+    } else {
+        show_dai_video_origin(id_block, params, pub_ads);
+    }
+
+}
+function show_dai_video_origin(id_block, params, pub_ads){
+
+
+    var origin_params = params;
+
+    if( is_desktop && ( (isChrome && site_config_js.devs.desactiver_autoplay_inchrome_153133569) ||
+        (isSafari && site_config_js.devs.desactiver_autoplay_insafari_153879194) ) ){
+        params.params.autoplay = false;
+        params.scroll = false;
+    }
+
+    var videoPlayer = 'Video dailymotion';
+    var tracking_Params = {
+        'videoId' : params.video,
+        'videoName' : '',
+        'videoPlayer' : videoPlayer,
+        'type_provider' : 'Dailymotion'
+    };
+
+    if( play_on_nav_diapo ){
+        if(params.right_video){
+            params.params.autoplay = false;
+        }
+    }
+
+    if(is_mobile && site_config_js.devs.autoplay_sites_mobiles_156367647){
+        params.params.playsinline=true;
+        params.params.muted= true;
+    }
+
+    console.log(params);
+    console.log(params);
+
+    if( /*isChrome &&*/ is_desktop &&  (params.params.autoplay || params.scroll ) && site_config_js.devs.autoplay_ko_sur_le_player_dm_158247682){
+        params.params.muted= true;
+    }
+
+    if(site_config_js.remove_logo_dm_player) {
+        params.params["ui-logo"] = false;
+    }
+    if(site_config_js.dm_ads_params){
+        params.params.ads_params= site_config_js.dm_ads_params;
+    }
+
+    var player = DM.player(document.getElementById(id_block), params);
+    if(params.loop){
+        player.loop = true;
+    }
+
+
+    if(site_config_js.devs.corriger_autoplay_des_videos_dm_sur_ie_0815 && (isIE( navigator.userAgent)  || navigator.userAgent.indexOf("Edge/") > -1 ) && origin_params.params.autoplay){
+        player.addEventListener('apiready', function (e) {
+            player.play();
+        });
+    }
+
+
+    if(site_config_js.devs.autoplay_firefox_155394464 && isFireFox > -1 && origin_params.params.autoplay){
+        player.addEventListener('apiready', function (e) {
+            player.play();
+        });
+    }
+
+    //Start code added for tagage 1000mercis
+    var prsentPoint = [];
+    nextPoint = 0;
+    player.addEventListener("durationchange", function(){
+        if(prsentPoint.length === 0){
+            videoDuration = this.duration;
+            for(j=0; j<100; j=j+25){
+                prsentPoint.push(Array(j, videoDuration*(j/100),false));
+            }
+        }
+    });
+    player.addEventListener('seeking', function(){
+        currentTime = this.currentTime;
+        for(j=0; j<prsentPoint.length; j++){
+            if( currentTime > prsentPoint[j][1]){
+                prsentPoint[j][2] = true;
+                nextPoint = j+1;
+            }else{
+                prsentPoint[j][2] = false;
+            }
+        }
+        if( ! GA_EVENT_DM &&  (!typeof site_config_js.devs.supprimer_GA_events_10725 !== 'undefined') && !site_config_js.devs.supprimer_GA_events_10725 ){
+            tracking_Params.event = 'Seek start';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        }
+    });
+
+    if( ! GA_EVENT_DM && (!typeof site_config_js.devs.supprimer_GA_events_10725 !== 'undefined') && !site_config_js.devs.supprimer_GA_events_10725 ){
+        player.addEventListener('seeked', function(){
+            tracking_Params.event = 'Seek end';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        });
+    }
+    if ((!typeof site_config_js.devs.supprimer_GA_events_10725 !== 'undefined') && !site_config_js.devs.supprimer_GA_events_10725) {
+        player.addEventListener('ad_start', function(){
+            tracking_Params.event = 'ad_start';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        });
+    }
+    if ((!typeof site_config_js.devs.supprimer_GA_events_10725 !== 'undefined') && !site_config_js.devs.supprimer_GA_events_10725) {
+        player.addEventListener('ad_end', function(){
+            tracking_Params.event = 'ad_end';
+            $(document).trigger('video_state_tracking', tracking_Params);
+            $(document).trigger('ads_player_ended', [id_block]);
+
+        });
+    }
+
+    if( ! GA_EVENT_DM && (!typeof site_config_js.devs.supprimer_GA_events_10725 !== 'undefined') && !site_config_js.devs.supprimer_GA_events_10725 ){
+        player.addEventListener('ad_play', function(){
+            tracking_Params.event = 'ad_play';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        });
+    }
+
+    player.addEventListener('start', function(){
+        if( params.params.hide_play_icon ){
+            if( $('.special-block-video').length > 0 ){
+                $("#"+id_block).parents().find('.special-block-video').addClass('video_started');
+            }
+        }
+        /*if( is_mobile && site_config_js.devs.network_mobile_sticker_video_131559695 ){
+            player.setFullscreen(true);
+        }*/
+    });
+
+
+
+    function play_video_on_scroll(){
+        if(params.scroll === true && (is_desktop || site_config_js.devs.autoplay_sites_mobiles_156367647)){
+            $playlist_iframe = $('.playlist_ iframe');
+            if($( window ).scrollTop() >= ( $playlist_iframe.length && $playlist_iframe.offset().top - 650 )){
+                player.play();
+                if(typeof player_right !== 'undefined'){
+                    player_right.pause();
+                }
+            }
+        }
+    }
+
+    if(!site_config_js.devs.gestion_autoplay_2videos_155518075){
+        if( params.right_video ){
+            player_right = player;
+        }
+    }
+
+    player.addEventListener('apiready', function (e){
+        if(params.scroll === true ){
+            if(is_desktop || site_config_js.devs.autoplay_sites_mobiles_156367647){
+                $( window ).bind('scroll', play_video_on_scroll);
+            }else{
+                var $el = $(player) ;
+                mobile_first_play (player, $el, 'dailymotion') ;
+            }
+        }
+
+        if(isIE(window.navigator.userAgent) && isIE_pl == false ){
+            if(params.params.autoplay === true && is_desktop){
+                $( window ).bind('scroll', function(){
+                    player.play();
+                    isIE_pl = true;
+                });
+            }
+        }
+
+        if(params.params.autoplay){
+            var $el = $(player) ;
+            mobile_first_play (player, $el, 'dailymotion') ;
+        }
+
+        play_on_click(this, params.right_video,'api_daily');
+        if( ((typeof params.firtVideoPl !== 'undefined' && params.firtVideoPl === false) || isIE_pl) && is_desktop){
+            player.play();
+        }
+
+    });
+
+    player.addEventListener("timeupdate", function(){
+        currentTime = this.currentTime;
+        if(currentTime > 1){
+            window.first_autoplay_mobile =  true ;
+        }
+        if(prsentPoint[nextPoint]+"" != "undefined" && currentTime > prsentPoint[nextPoint][1] && !prsentPoint[nextPoint][2]){
+            prsentPoint[nextPoint][2] = true;
+            var currentPrsentPoint = prsentPoint[nextPoint][0];
+            //Trigger params (video_state_tracking_event, currentPrsentPoint, currentVideoId, currentVideoName)
+            tracking_Params.event = currentPrsentPoint;
+            $(document).trigger('video_state_tracking', tracking_Params);
+            nextPoint++;
+        }
+    });
+    player.addEventListener("ended", function(){
+        tracking_Params.event = 'End';
+        $(document).trigger('video_state_tracking', tracking_Params);
+        if(window.playlist){
+            playlist(id_block, '', params, "dailymotion", pub_ads);
+        }
+
+        if( params.next === true ){
+            next_video_playlist(id_block);
+        }
+    });
+
+    // //End code for tagage 1000mercis
+    if( ! GA_EVENT_DM ){
+        player.addEventListener("play", function(){
+            tracking_Params.event = 'Play';
+            $(document).trigger('video_play', player);
+            $(document).trigger('video_state_tracking', tracking_Params);
+        });
+    }
+
+    player.addEventListener("pause", function(){
+        if( ! GA_EVENT_DM ){
+            tracking_Params.event = 'Pause';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        }
+        if(params.scroll === true){
+            if(is_desktop || site_config_js.devs.autoplay_sites_mobiles_156367647){
+                $( window ).bind('scroll', play_video_on_scroll);
+            }else{
+                var $el = $(player) ;
+                mobile_first_play (player, $el, 'dailymotion') ;
+            }
+        }
+    });
+
+    player.addEventListener("volumechange", function(){
+        if( ! GA_EVENT_DM ){
+            tracking_Params.event = 'Volume changed';
+            $(document).trigger('video_state_tracking', tracking_Params);
+        }
+        $(document).trigger('player_controle', [id_block, "volumechange"]);
+    });
+
+    player.addEventListener("error", function(){
+        tracking_Params.event = 'Error';
+        $(document).trigger('video_state_tracking', tracking_Params);
+    });
+
+    player.addEventListener("ad_end", function(){
+        var volume = player.volume;
+        var muted = player.muted;
+        if(!muted && volume === 0){
+            player.setVolume(0.5);
+        }
+        window.ad_playing = false;
+    });
+
+    function force_dai_player_mute(){
+        if(params.params !== undefined && params.params.mute){
+            player.setMuted(true);
+            //$(document).trigger('player_controle', [id_block, "volumechange"]);
+        }
+    }
+    player.addEventListener("video_start", force_dai_player_mute);
+
+    player.addEventListener("video_start", function(){
+        $(document).trigger('ads_player_ended', [id_block]);
+    });
+
+
+    player.addEventListener("ad_play", function(){
+        if(params.params !== undefined && params.params.mute){
+            if(!site_config_js.devs.player_sticke_ko_160582058){
+                player.setVolume(0);
+            }
+
+            $(document).trigger('player_controle', [id_block, "volumechange"]);
+            player.removeEventListener("video_start", force_dai_player_mute);
+        }
+        window.ad_playing = true;
+    });
+    if(site_config_js.devs.mise_en_place_vidcoin_151485991){
+        add_vidcoin_player(id_block, vidcoin_params);
+    }
+    //Demande de Rahal 05/10/2017
+    return player;
+}

@@ -1,0 +1,28 @@
+function do_mobile_first_play ($player, $el, type){
+    try{
+        if( !rw_isMobile.apple.device  &&  (is_mobile || is_tablet) && window.first_autoplay_mobile === undefined){
+
+            $("body").on({touchmove:function(a){
+                    if( window.first_autoplay_mobile === undefined && $(window).scrollTop() + $(window).height()  >= $el.offset().top){
+                        $player.play();
+                        window.first_autoplay_mobile =  true ;
+
+                        //lancer le player Mute par défaut
+                        if(site_config_js.mobile_autoplay_mute){
+                            if(type == 'videojs'){
+                                $player.muted(true);
+                            }else if(type == 'dailymotion'){
+                                $player.setVolume(0) ;
+                            }
+
+                        }
+                    }
+
+                }});
+
+        }
+    }catch(e){
+
+    }
+
+}

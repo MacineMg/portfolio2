@@ -1,0 +1,106 @@
+function do_play_selected_video(response,prov,p,s,id, pub_ads){
+    var mediaid_ = response.mediaid;
+    var url_template = site_config_js.url_template;
+    var id_pub = pub_ads;
+    var video_id = response.video_id;
+    var type = response.provider;
+    var auto_play = true;
+    var firtVideoPl = true;
+    if( play_on_nav_diapo ){
+        auto_play = false;
+        firtVideoPl = false;
+    }
+    var params_ = [];
+    index_pl = window.index_pl || 0;
+    index_pl ++;
+    var params = p;
+    var force_play_type = p.force_play_type;
+    if (force_play_type === undefined ) {
+        force_play_type = false;
+    }
+    if(prov == 'youtube'){
+        if(type == 'youtube'){
+            setup = s;
+            p.mediaid = mediaid_;
+            p.youtube_id = video_id;
+            params_ = p;
+            params_.firtVideoPl = firtVideoPl;
+            setup.src = mediaid_;
+        }else{
+            params_ = {
+                video: video_id,
+                height: s.height,
+                width: s.width,
+                force_play_type : force_play_type,
+                other_videos : p.other_videos,
+                firtVideoPl:firtVideoPl,
+                right_video: true,
+                params : {
+                    autoplay : auto_play,
+                    mute : s.muted,
+                    other_videos : p.other_videos,
+                    playlist:"true",
+                }
+            };
+        }
+    }else{
+        if(type == 'dailymotion'){
+            p.video = response.video_id;
+            params_ = p;
+            params_.firtVideoPl = firtVideoPl;
+        }else{
+            var setup = {
+                autoplay: auto_play,
+                height: "169px",
+                width: "300",
+                src : mediaid_,
+                techOrder: ["youtube","flash"],
+                playsinline:"true",
+                ytcontrols:1,
+                playlist:true,
+            };
+            params_ = {
+                autoplay: "yes",
+                height: "169px",
+                mediaid: mediaid_,
+                mutevideo: params.params.mute,
+                width: "300",
+                youtube_id: video_id,
+                other_videos : p.other_videos,
+                force_play_type : force_play_type,
+                playlist : true,
+                right_video: true,
+                firtVideoPl : firtVideoPl
+            };
+        }
+    }
+    if(type == 'youtube'){
+        if(site_config_js.devs.mise_en_place_jw7_151445890){
+            show_jw7_player(id, setup, url_template, id_pub, type, params_);
+        }else if(site_config_js.devs.Passage_du_player_sur_videojs){
+            var video_url = mediaid_;
+            var $div_parent = $('#'+id).parent();
+            $('#'+id).remove();
+
+            id = id+video_id;
+            $div_parent.html('<div id="'+id+'"></div>');
+            $("#"+id).addClass('video-js vjs-default-skin vjs-big-play-centered');
+            show_videojs(id, setup, url_template, id_pub, type, params_);
+        }else{
+            //Traitement spécifique a FLOWPLAYER, si besoin, il faut ajouter le traitement pour d'autre player
+            var $balise_video = $('#'+id);
+            var href = 'api:'+response.video_id;
+            if( $balise_video.is('a') ){
+                $balise_video.attr('href', href);
+            }else{
+                id = id+video_id;
+                var new_balise_video = '<a class="fwplayer_block" href="'+ href + '" style="display:block;width:100%; text-align: center;margin-bottom: 4px;height:169px;" id="' + id + '" >';
+                $balise_video.before(new_balise_video);
+                $balise_video.remove();
+            }
+            show_video(id, url_template, id_pub, type, "", true, params_);
+        }
+    }else{
+        show_dai_video(id, params_, pub_ads);
+    }
+}

@@ -1,0 +1,40 @@
+function do_playlist(id, s, p, prov, pub_ads) {
+    if( (s != '' && s.playlist == true) || (p.params != undefined && p.params.playlist == "true")){
+        index_pl = window.index_pl || 0;
+        index_pl ++;
+        var params = p;
+        var force_play_type = p.force_play_type;
+        if (force_play_type === undefined ) {
+            force_play_type = false;
+        }
+        if(p.other_videos != 'false' ){
+            var mediaid_ = p.other_videos[0]['url'];
+            var video_id = p.other_videos[0]['video_id']
+            var type  = p.other_videos[0]['type'];
+            var response ={post_video:'',mediaid: mediaid_,video_id: video_id, provider: type };
+            p.other_videos.splice(0,1);
+            if(p.other_videos.length==0){
+                p.other_videos='false';
+            }
+            play_selected_video(response,prov,p,s,id, pub_ads);
+        }else{
+            $.ajax({
+                url : '/',
+                type : 'GET',
+                dataType: 'json',
+                data : {
+                    action : 'ajax_random_post_video',
+                    force_play_type : force_play_type,
+                    call: index_pl,
+                },
+                success : function( response ) {
+                    if (response) {
+                        play_selected_video(response,prov,p,s,id, pub_ads);
+                    }
+                    return false;
+                },
+            });
+        }
+    }
+    return false;
+}

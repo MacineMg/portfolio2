@@ -1,0 +1,322 @@
+var companyInfo;ipc='CETIM CETIM OUEST';var GQ_company='CETIM CETIM OUEST';var ips='0';
+console.log("starting GetQuanty analysis");
+
+var siteid='101344528';
+var GQ_email='';
+
+
+console.log("chargement de la popup getquanty sur https://www.zdnet.fr/ avec le code tBhzGMs5GB");
+
+
+
+
+(function(W,i,s,e,P,o,p){W['WisePopsObject']=P;W[P]=W[P]||function(){
+  (W[P].q=W[P].q||[]).push(arguments)},W[P].l=1*new Date();o=i.createElement(s),
+  p=i.getElementsByTagName(s)[0];o.async=1;o.src=e;p.parentNode.insertBefore(o,p)
+  })(window,document,'script','//loader.wisepops.com/get-loader.js?v=1&site=tBhzGMs5GB','wisepops');
+  
+  wisepops('options',{browserStorage:true, cookieMaxSize:1024});
+  
+
+/*
+window.addEventListener('beforeunload', function(e) {
+  var myPageIsDirty = true; //you implement this logic...
+  if(myPageIsDirty) {
+  //    e.preventDefault(); //per the standard
+  //  e.returnValue = ''; //required for Chrome
+    
+    console.log("on Exit event");
+    
+    wisepops("event", "on-exit");
+    dataLayer.push({
+                event: 'on-exit','gq_data':push_data
+                });
+
+    
+    
+  }
+  //else: user is allowed to leave without a warning dialog
+});
+
+
+window.addEventListener('mouseleave', function(e) {
+if ((e.clientY < 0)) {
+
+            console.log("mouse leave page");
+            
+        //        e.preventDefault(); //per the standard
+    //e.returnValue = ''; //required for Chrome
+    
+      wisepops("event", "on-leave");
+      
+          dataLayer.push({
+                event: 'on-leave','gq_data':push_data
+                });
+ 
+        }
+  //else: user is allowed to leave without a warning dialog
+});
+
+
+document.addEventListener('visibilitychange', e=>{
+     if (document.visibilityState === 'visible') {
+     
+       console.log("tab change");
+            
+  //  e.preventDefault(); //per the standard
+  //  e.returnValue = ''; //required for Chrome
+    
+    
+   //report that user is in focus
+    } else {
+    
+      wisepops("properties", gq_data);
+        wisepops("event", "on-tabchange");
+        
+            dataLayer.push({
+                event: 'on-tabchange','gq_data':push_data
+                });
+    
+    
+    
+     //report that user is out of focus
+    }
+    
+    });  
+    
+    */
+
+
+function onMouseOut(event) {
+  // If the mouse is near the top of the window, show the popup
+  // Also, do NOT trigger when hovering or clicking on selects
+  if (
+    event.clientY < 50 &&
+    event.relatedTarget == null &&
+    event.target.nodeName.toLowerCase() !== 'select') {
+    // Remove this event listener
+    document.removeEventListener("mouseout", onMouseOut);
+
+    // Show the popup
+    console.log("mouseout");
+    wisepops("event", "on-exit");
+  }
+}
+
+
+window.addEventListener('mouseout', onMouseOut);
+
+function onScroll(event) {
+
+  if (!scroll_detected &&
+    event.relatedTarget == null &&
+    event.target.nodeName.toLowerCase() !== 'select') {
+    // Remove this event listener
+    document.removeEventListener("scroll", onScroll);
+
+    // Show the popup
+    console.log("scroll");
+    
+    scroll_detected=true;
+    wisepops("event", "on-scroll");
+  }
+}
+
+var scroll_detected=false;
+window.addEventListener('scroll', onScroll);
+
+
+  
+ 
+	
+	
+var gq_data={ 
+gq_email : "", 
+gq_domain: "",
+gq_domains: "",
+gq_goals: "",
+gq_company :"CETIM CETIM OUEST",
+qq_nafcode: "72.19Z",
+gq_nafcode: "72.19Z",
+gq_naflabel : "recherche-développement en autres sciences physiques et naturelles",
+gq_turnover : "",
+gq_size : "F = 500 a 1000",
+gq_jurform : "DIVERS",
+gq_type : "DIVERS",
+gq_segment : "prospect-default",
+gq_segment_category : "prospect",
+gq_category : "prospect",
+gq_scoring : "0",
+gq_siren : "775629074",
+gq_address : "74 ROUTE DE LA JONELIERE",
+gq_siret : "77562907400086",
+gq_phone : "+33 2 40 37 36 35",
+gq_zipcode : "44300",
+gq_city : "NANTES",
+gq_country : "",
+gq_siteid : "101344528",
+gq_userid : "9CFA1B3B-E330-795C-385B-203B14C2C999",
+gq_sessid : "36A36C1D-DB52-1075-0948-180C00A9448E",
+gq_keywords : "cybersécurité,mac,sécurité informatique,télécoms,transformation digitale,informatiques,datacenter,cybercriminels,livres blancs,serveurs",
+gq_client : "UNIFY GROUPE",
+gq_url : "https://www.zdnet.fr/",
+gq_page : "ZDNet - Actualité, business et technologies pour les professionnels",
+gq_os : "Windows 10",
+gq_referer : "https://ahk.alwaysdata.net/",
+gq_campaign :"",
+gq_source : "",
+gq_medium : "",
+gq_content : "",
+gq_dept : "44"
+};
+
+var gq_goals=GQget_cookie("gq_goals");
+if( gq_goals) gq_data.gq_goals=gq_goals.substring(0,255);
+
+var now = new Date();
+gq_data.gq_daytime =now.getHours();
+gq_data.gq_weekday =now.getDay();
+
+
+if (localStorage.getItem("gq_nb_session")) gq_data.gq_nb_session= parseInt(localStorage.getItem("gq_nb_session"))+1; else gq_data.gq_nb_session=1;
+
+if (localStorage.getItem("gq_segment") && gq_data.gq_segment!=localStorage.getItem("gq_segment")) gq_data.gq_segment_changed=1;
+if (localStorage.getItem("gq_scoring") && gq_data.gq_scoring!=localStorage.getItem("gq_scoring")) gq_data.gq_scoring_changed=1;
+
+localStorage.setItem("gq_nb_session",gq_data.gq_nb_session);
+localStorage.setItem("gq_scoring",gq_data.gq_scoring);                            
+localStorage.setItem("gq_segment",gq_data.gq_segment);                            
+
+
+if(sessionStorage.getItem("gq_nb_pages")) gq_data.gq_nb_pages= parseInt(sessionStorage.getItem("gq_nb_pages"))+1; else gq_data.gq_nb_pages=1;
+sessionStorage.setItem("gq_nb_pages",gq_data.gq_nb_pages);
+var push_data={};
+push_data=gq_data;
+
+
+
+
+function scoring_done(evt){
+
+           
+      if ( typeof window["dataLayer"]==='undefined' ){
+                dataLayer = [];
+                }
+       
+       
+       if (!gq_data) {
+       companyInfo ={};
+       gq_data={gq_company:''};
+       
+       }
+       
+     
+    
+    
+    
+    
+
+
+
+       
+     
+     
+    
+       
+    
+       
+       
+              
+       
+         try {
+               gq_data=push_data;
+            
+               dataLayer.push({
+                event: 'scoring_done','gq_data':push_data
+                });
+
+                
+                } catch(e) { console.log(e);}
+                
+        
+                    
+        console.log('scoring_done');
+        
+
+
+
+        
+        
+            
+var show= document.getElementsByClassName("GQShow");
+var hide= document.getElementsByClassName("GQHide");       
+   
+        
+                
+if (show.length>0) show[0].style.display="block";       
+if (hide.length>0) hide[0].style.display="none";
+                 
+var company= document.getElementsByClassName("GQCompany");
+if (company.length>0) company[0].innerHTML=company[0].innerHTML.replace('{company}','CETIM CETIM OUEST');
+         
+         
+
+//console.log(" wisepops called");
+
+var witerations=0;
+								
+var wpushvalues= setInterval(function(){
+
+if (typeof wisepops === "function") {
+
+clearInterval(wpushvalues);
+//console.log("sending to wisepops ".$loadwisepops);
+//console.log(gq_data);
+
+
+try{
+wisepops("properties", gq_data);
+wisepops("event", "scoring_done");
+//console.log("infos sent to wisepops");
+
+} catch(e){console.log(e);} }
+else {
+            witerations++;
+				if (witerations<3) {
+   				console.log("wisepos not ready yet");
+   				}
+   				else
+   				{
+   				console.log("aborting wisepops after 3 attempts");
+   				clearInterval(wpushvalues);
+   				}
+    				
+        }
+
+	},3000);
+
+   
+         
+         
+         
+         
+       
+            
+            // add custom call here    
+                
+            }
+scoring_done();
+
+var gq_event = document.createEvent('Event');
+gq_event.initEvent('scoring_done', true, true);
+window.dispatchEvent(gq_event);
+
+
+addCustomQS("custom[country]=France&custom[countrycode]=FR&custom[consent]=1&custom[company]=CETIM+CETIM+OUEST&custom[source]=IP-INTERNAL&custom[segment]=prospect-default");
+//newsession
+
+//stream
+ 
+//tracking live
+
+//end

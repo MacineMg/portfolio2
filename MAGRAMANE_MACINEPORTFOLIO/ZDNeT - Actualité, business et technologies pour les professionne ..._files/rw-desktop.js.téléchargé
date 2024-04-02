@@ -1,0 +1,102 @@
+
+
+(function($){
+
+	function masonryBlockRight() {
+ 		if(window.Masonry){
+	        var container = document.querySelector('#blockRight .list-ms-item');
+	        var msnry;
+	 		if($(window).width()<992 && $(window).width()>767){
+	            msnry = new Masonry( container, {
+	 			itemSelector: '.ms-item',
+	 			columnWidth: '.ms-item',                
+	 			} );
+			}else{
+	 			msnry = new Masonry( container, {
+	 			itemSelector: '.ms-item',
+	 			columnWidth: '.ms-item',                
+	 			} );
+				msnry.destroy();
+			}
+ 		}
+ 	}
+	 	
+	function ActiveZoombox() {
+	    $(".thecontent a,.top_img,.big_img_link").each(function(index) {
+
+	        children = $(this).children('img');
+	        var pos_recaptcha = -1;
+	        if (typeof $(this).attr('id') !== 'undefined') {
+	            pos_recaptcha = $(this).attr('id').toLowerCase().indexOf("recaptcha");
+	        }
+
+	        let href = null;
+	        if($(this).attr('href')) {
+	            href = $(this).attr('href');
+	        }else if($(this).attr('data-href')) {
+	            href = $(this).attr('data-href');
+	            $(this).attr('href', $(this).attr('data-href'));
+	        }
+
+	        if(href) {
+	            href = href.toLowerCase().split(/[#?]/)[0].split('.').pop();
+	            href = href.match('/gif|jpg|jpeg|png|webp|avif/');
+	        }
+
+	        if (children.length == 1 && children[0].tagName == "IMG" && $(this).parents(".diaporama").length === 0 && pos_recaptcha == -1 && href) {
+
+	            if ($(this).attr("title") === null) {
+	                $(this).attr("title", strip_tags(document.title));
+	            }
+	            try {
+	                $(this).zoombox();
+	            } catch (e) {}
+	        }
+	    });
+	}
+
+	function masonryFooter() {
+ 		if(window.Masonry){
+ 			var container = document.querySelector('footer>.container');
+	 		if( container ){
+	 			var msnry_options = {
+					itemSelector: '.ms-item',
+					columnWidth: '.ms-item',
+				};
+				if( $('body').hasClass('rtl') ) {
+					msnry_options.isOriginLeft = false;
+				}
+				var msnry = new Masonry( container, msnry_options);
+			}
+		}
+ 	}
+
+ 	$(document).ready(function(){
+ 	
+		masonryFooter();
+
+		if( $('#blockRight .list-ms-item').length ){
+			masonryBlockRight();
+		}
+
+		// wait till loading..
+		$(window).on('load',function(){
+			if( $('#blockRight .list-ms-item').length ){
+				if($(window).width()<992 && $(window).width()>767){
+					masonryBlockRight();
+					setTimeout( masonryBlockRight , 5000 ) ;
+				}
+			}
+
+			if($.zoombox){
+		    	ActiveZoombox();
+			}
+		}); 
+
+		$(window).resize(function(){
+			if( $('#blockRight .list-ms-item').length ){
+				masonryBlockRight();
+			}
+		});
+	});
+})(jQuery);

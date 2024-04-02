@@ -1,0 +1,44 @@
+/**
+ * Forcer le play lors d'un clic sur le botton "cliquez pour lire la suite"
+ * @param  {[object]}  player         [le player en cours]
+ * @param  {Boolean} is_right_video [true si le player existe dans la sidebar]
+ */
+function do_play_on_click(player, is_right_video, type){
+    if( typeof player !== "undefined" ){
+        var $btn_more = $('#morebtn');
+        if($btn_more.length){
+            $btn_more.on('click', function(){
+                force_play_by_api(player, type);
+                $('#all_content').removeClass('hidden');
+                $( ".article_body_content *:first-child + p,.article_body_content > p").addClass('first_paragraph');
+                $btn_more.remove();
+            });
+        }
+        if( play_on_nav_diapo ){
+            if(is_right_video){
+                var $btn_navs = $('#scroll_arrows .btn-navs');
+                if($btn_navs.length > 0){
+                    $btn_navs.on('click', function(){
+                        force_play_by_api(player, type);
+                    });
+                }
+            }
+        }
+    }
+}
+var first_clickToPlay = true;
+
+function force_play_by_api(player, type){
+    if(first_clickToPlay){
+        if(type === 'jwp7' && player.getState() !== 'playing'){
+            player.play();
+            first_clickToPlay = false;
+        }else if(type === 'videojs' && player.paused() ){
+            player.play();
+            first_clickToPlay = false;
+        }else if(type === 'api_daily'){
+            player.play();
+            first_clickToPlay = false;
+        }
+    }
+}

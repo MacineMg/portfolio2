@@ -1,0 +1,42 @@
+
+function show_video_brightcove(id_block, params){
+
+    var width=  params.width ;
+    var height=  params.height ;
+
+    var default_player=  params.default_player ;
+    var mobile_player=  params.mobile_player ;
+    var html5_player=  params.html5_player ;
+    var force_player=  params.force_player ;
+    var video_id=  params.video_id ;
+
+    var player  = params.default_player ;
+    var autoplay  = params.autoplay ;
+    var mutevideo  = params.mutevideo ;
+
+    if(force_player){
+        player  = force_player ;
+    }else if(mobile_player && ( is_mobile || is_tablet ) ){
+        player  = mobile_player ;
+    }else if(html5_player && !flash_active() ){
+        player  = html5_player ;
+    }
+
+    var src = "//players.brightcove.net/5354193441001/" + player + "_default/index.html?videoId=" + video_id ;
+
+
+    if( autoplay ){
+        src += '&autoplay=true' ;
+    }
+
+    if(mutevideo){
+        src += '&mute=true' ;
+    }
+
+
+    var html = '<iframe src= "'+ src +'" \
+scrolling="no"  frameborder="0" class="embeded" style="border:none;" width="'+ width +'" height="'+  height +'"  allowTransparency="true"\
+></iframe>'
+    $('#' + id_block).html(html) ;
+
+}

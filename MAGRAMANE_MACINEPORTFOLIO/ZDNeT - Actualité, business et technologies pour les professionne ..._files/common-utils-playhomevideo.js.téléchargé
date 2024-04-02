@@ -1,0 +1,61 @@
+function playHomeVideo(e, id, type, video_id) {
+    param = {};
+    if (type == 'youtube') {
+        param = {
+            youtube_id: video_id,
+            mediaid : 'https://www.youtube.com/watch?v='+video_id
+
+        };
+    } else if (type == 'dailymotion') {
+        param = {
+            dailymotion_id: video_id,
+            mediaid : site_config_js.SITE_SCHEME + '://dai.ly/'+video_id,
+            params : {
+                autoplay : true
+            }
+        };
+    }
+
+    var url_template = site_config_js.url_template;
+    var id_pub = site_config_js.id_pub;
+    e.preventDefault();
+
+    var height = jQuery("#post-" + id + " .thumbnail .thumbnail-visu").height();
+    jQuery("#post-" + id + " .thumbnail .thumbnail-visu").hide();
+    jQuery("#post-" + id + " #video_" + id).css({
+        "display": "block",
+        'height': height
+    });
+
+    if(site_config_js.devs.passage_du_player_sur_jw6_111776366){
+        var setup = {
+            autoplay:true
+        };
+        if(height){
+            setup.height = height ;
+        }
+        show_jw_player("video_" + id, setup, url_template, id_pub, type, param);
+    }else if(site_config_js.devs.Passage_du_player_sur_videojs){
+
+        var $elem =  jQuery("#video_" + id).parent().find('.thumbnail-visu') ;
+
+        var width = $elem.outerWidth();
+        var height = $elem.outerHeight();
+
+        var setup = {
+            autoplay: true,
+            width: '100%',
+            height: height + 'px',
+            src: param.mediaid,
+            techOrder: ["youtube","html5","flash"],
+            ytcontrols: 1,
+        };
+        jQuery("#video_" + id).addClass('video-js').addClass('vjs-default-skin').addClass('vjs-big-play-centered');
+        show_videojs("video_" + id, setup, url_template, id_pub, type, param);
+    }else {
+        show_video("video_" + id, url_template, id_pub, type, "", true, param);
+    }
+
+
+    return false;
+}

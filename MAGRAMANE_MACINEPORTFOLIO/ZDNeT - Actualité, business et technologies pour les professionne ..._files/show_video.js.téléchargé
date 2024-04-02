@@ -1,0 +1,363 @@
+function do_show_video(id_block, url_template, pub_ads, type_provider, src_splash, autoPlay, config_params) {
+
+    var mutevideo = config_params.mutevideo ;
+    var top = 0 ;
+    if (config_params.youtube_id && jQuery.browser.mobile ) {
+        var height = jQuery("#" + id_block).height();
+        var width = jQuery("#" + id_block).width();
+        if(config_params.diapo_full){
+            width = jQuery("#" + id_block).parent().parent().outerWidth();
+            var height_parent = jQuery("#" + id_block).parent().parent().outerHeight();
+            height = width * 390/460 ;
+            top = (height_parent - height) /2 ;
+        }
+
+        // ajouter les youtube à la liste de youtubes players
+        var yt_player = {'id_block':id_block, 'yt_id':config_params.youtube_id, 'width':width, 'height':height};
+        youtube_players.push(yt_player);
+        if(!script_is_loaded) {
+            show_all_youtube(youtube_players);
+        } else {
+            createPlayer(yt_player);
+        }
+
+        return;
+    }
+
+
+    if(type_provider == 'dailymotion'){
+        var params = {
+            "video" : config_params.dailymotion_id ,
+            "width" : "100%"
+        } ;
+
+        if(config_params.width){
+            params.width = config_params.width ;
+        }else{
+            params.width = jQuery("#" + id_block).parent().width();
+        }
+        if(config_params.width){
+            params.width = config_params.width ;
+        }else{
+            params.width = jQuery("#" + id_block).parent().width();
+        }
+
+        if(config_params.height){
+            params.height = config_params.height ;
+        }else{
+            params.height = params.width * 390/460 ;
+        }
+
+        if((config_params.params !== undefined && config_params.params.autoplay) || autoPlay ){
+            params.params = {};
+            params.params.autoplay = true;
+        }
+
+        show_dai_video(id_block, params, pub_ads) ;
+        return ;
+    }else if(config_params.mediaid.indexOf('adways.com') > -1 ){
+
+        var params = {
+            "width" : "100%",
+            "src" : config_params.mediaid
+        } ;
+
+        if(config_params.width){
+            params.width = config_params.width ;
+        }else{
+            params.width = jQuery("#" + id_block).parent().width();
+        }
+        if(config_params.width){
+            params.width = config_params.width ;
+        }else{
+            params.width = jQuery("#" + id_block).parent().width();
+        }
+
+        if(config_params.height){
+            params.height = config_params.height ;
+        }else{
+            params.height = params.width * 390/460 ;
+        }
+
+        show_adways_player(id_block, params) ;
+        return ;
+
+    }
+
+
+    var clip_fp;
+    if (type_provider == 'youtube') {
+        clip_fp = {
+            autoPlay: autoPlay,
+            autoBuffering: false,
+            provider: 'youtube',
+            urlResolvers: ['youtube', 'bitrateselect']
+        };
+    } else if (type_provider == 'dailymotion') {
+        clip_fp = {
+            video_id:config_params.dailymotion_id,
+            autoPlay: autoPlay,
+            autoBuffering: false,
+            provider: 'dailymotion',
+            urlResolvers: ['dailymotion', 'bitrateselect']
+        };
+    } else {
+        clip_fp = {
+            autoPlay: autoPlay,
+            autoBuffering: false
+        };
+    }
+    if (config_params.url) {
+        clip_fp.url = config_params.url;
+    }
+    var mute_ = false;
+    if(typeof mutevideo === 'undefined' ){
+        mutevideo = false;
+    }
+    if(mutevideo){
+        mute_ = true;
+    }
+
+    clip_fp.eventCategory = 'Video player';
+    var params = {
+        clip: clip_fp,
+        onStart: function(e) {
+            sendEvent(e, "Start");
+            $f().getPlugin("adswizz").hide();
+        },
+        onLoad : function(){
+            if(mute_){
+                this.mute();
+            }
+        },
+        // onPause: function(e) {
+        //     sendEvent(e, "Pause");
+        // },
+        // onResume: function(e) {
+        //     sendEvent(e, "Resume");
+        // },
+        // onSeek: function(e) {
+        //     sendEvent(e, "Resume");
+        // },
+        onStop: function(e) {
+            sendEvent(e, "Stop");
+        },
+        onFinish: function(e) {
+            sendEvent(e, "Finish");
+        },
+        // Track ads playing
+        onAdsLoadComplete : function() {
+            console.log( 'AdsLoadComplete event ') ;
+            sendEvent('adwizz', "AdsLoadComplete");
+        } ,
+        onAdsLoadFailed : function() {
+            console.log( 'AdsLoadFailed event') ;
+            sendEvent('adwizz', "AdsLoadFailed");
+        } ,
+        onAdStarted : function() {
+            console.log( 'AdStarted event') ;
+            sendEvent('adwizz', "AdStarted");
+
+        } ,
+        onAdComplete : function() {
+            console.log( 'AdComplete') ;
+            sendEvent('adwizz', "AdComplete");
+        } ,
+        onAdsComplete : function() {
+            console.log( 'onAdsComplete event') ;
+            sendEvent('adwizz', "AdsComplete");
+        } ,
+        onBeforeFinish: function (clip) {
+            if(config_params.autoloop && config_params.autoloop.toLowerCase() == 'yes'){
+                show_video(id_block, url_template, pub_ads, type_provider, src_splash, autoPlay, config_params, mutevideo);
+                return false;
+            }
+            var setup = '';
+            if (config_params.playlist) {
+                setup = { "playlist" : config_params.playlist };
+            }
+            playlist(id_block, setup, config_params, type_provider, pub_ads);
+        },
+        plugins: {
+            controls: {
+                autoHide: "always"
+            },
+
+            // bandwidth detection plugin
+            bitrateselect: {
+                url: url_template + "/assets/flowplayer/flowplayer.bitrateselect.swf",
+                onStreamSwitchBegin: function(newItem, currentItem) {
+                    $f().getPlugin('content').setHtml("Will switch to: " + newItem.streamName +
+                        " from " + currentItem.streamName);
+                },
+                onStreamSwitch: function(newItem) {
+                    $f().getPlugin('content').setHtml("Switched to: " + newItem.streamName);
+                }
+
+            }
+            // ,
+            // /***end youtube**/
+            // gatracker: {
+            //     url: url_template + "/assets/flowplayer/flowplayer.analytics-3.2.9.swf",
+
+            //     // track all possible events. By default only Start and Stop
+            //     // are tracked with their corresponding playhead time.
+            //     events: {
+            //         all: true
+            //     },
+            //     debug: false,
+            //     accountId: site_config_js.google_analytics_id // your Google Analytics id here
+            // }
+
+        }
+
+    };
+    if (type_provider == 'dailymotion') {
+        params.plugins.dailymotion = {
+            url: url_template + "/assets/flowplayer/flowplayer.dailymotion-3.2.12.swf",
+            qualityLabels: {
+                "hd720": "HD 720p",
+                "hq": "Large 480p",
+                "sd": "Medium 320p",
+                "ld": "Small"
+            },
+            bitratesOnStart: false,
+        };
+    }else if (type_provider == 'youtube'){
+        params.plugins.youtube = {
+            url: url_template + "/assets/flowplayer/flowplayer.youtube-3.2.11.swf",
+            hd: true,
+            defaultQuality: "large",
+            hdLevel: "hd720",
+            loadOnStart: true,
+            enableGdata: false,
+            onVideoRemoved: function() {
+                console.log("Video Removed");
+            },
+            onVideoError: function() {
+                console.log("Incorrect Video ID");
+            },
+            onEmbedError: function() {
+                console.log("Embed Not Allowed");
+            },
+            onApiData: function(data) {
+
+                // use the function defined above to show the related clips
+                console.log("Received data");
+                // use the function defined above to show the related clips
+                showInfo(data, "#playlist1");
+
+                //load the related list for the first clip only
+                if (shownRelatedList) return;
+                showRelatedList(data, "#playlist1");
+                shownRelatedList = true;
+            },
+            displayErrors: false
+        };
+    }
+
+    if (pub_ads && !pub_ads.type) {
+        params.plugins.adswizz = {
+            url: url_template + "/assets/flowplayer/AdswizzVIP-Flowplayer-3.2.4.swf",
+            server: "ads.stickyadstv.com",
+            loadTimeout: 10000,
+            ads: pub_ads,
+            adTimeDisplay: {
+                text: "Your video will start in [time] seconds"
+            }
+        };
+    }
+    if(pub_ads && pub_ads.type == 'liverail'){
+        if(pub_ads.liverail){
+            params.plugins.liverail = pub_ads.liverail ;
+            params.plugins.liverail.url = url_template + "/assets/flowplayer/LiveRailPlugin327.swf";
+        }
+        if(pub_ads.liverail2){
+            params.plugins.liverail2 = pub_ads.liverail2 ;
+            params.plugins.liverail2.url = url_template + "/assets/flowplayer/LiveRailPlugin327.swf";
+        }
+        if(pub_ads.liverail3){
+            params.plugins.liverail3 = pub_ads.liverail3 ;
+            params.plugins.liverail3.url = url_template + "/assets/flowplayer/LiveRailPlugin327.swf";
+        }
+    }
+
+    if (type_provider == 'dailymotion') {
+        play_dailymotion(id_block, params);
+    } else {
+
+        var player_params = {src:url_template + "/assets/flowplayer/flowplayer-3.2.16.swf", wmode: "transparent"} ;
+        // Other flash fit
+        if ('flashfit' in config_params ) {
+            player_params.flashfit = config_params.flashfit;
+        }
+        // adaptive ratio
+        if ( 'adaptiveratio' in config_params ) {
+            player_params.adaptiveRatio = config_params.adaptiveRatio;
+        }
+        // personal ratio
+        if ( 'ratio' in config_params ) {
+            player_params.ratio = config_params.ratio;
+        }
+
+        flowplayer(id_block, player_params , params);
+
+        $f(id_block).onCuepoint([1000], function(clip, cuepoint) {
+            // put some logging information into firebug console
+            var duration =  clip.duration ;
+            p25 =  duration *1000 /8 ;
+            p50 =  duration *1000 /2 ;
+            p75 =  duration *1000 * 3/4 ;
+            if(clip.cuepoints.length <2){
+                this.onCuepoint([{time:p25, title:'lecture à 25% '}, {time:p50, title:'lecture à 50% '}, {time:p75, title:'lecture à 75% '}], function(clip, cuepoint) {
+                    send_GA( 'Video player', cuepoint.title, self.location.href);
+                });
+            }
+
+        });
+    }
+
+}
+
+function play_dailymotion(id_block, player_params) {
+    var rand = Math.floor((Math.random() * 100) + 1);
+    var params = { allowScriptAccess: "always", allowFullScreen:"true", wmode: "transparent" };
+    var atts = { id: "mydmplayer"/*, allowfullscreen:"true"*/ };
+    video_id= player_params.clip.video_id;
+    var width = $("#"+id_block).width();
+    if($("#"+id_block).parent(".block_video_gallery").length > 0){
+        width = $("#"+id_block).parent(".block_video_gallery").width();
+    }
+
+    var height = $("#"+id_block).height();
+    if($("#"+id_block).parent(".block_video_gallery").length > 0){
+        height = $("#"+id_block).parent(".block_video_gallery").height();
+    }
+
+    $("#"+id_block).html('<div id="dmapiplayer'+rand+'"></div>');
+
+    $("#"+id_block).attr({"href":"#","onclick":"return false;"});
+
+    swfUrlStr = site_config_js.SITE_SCHEME + "://www.dailymotion.com/swf/"+video_id+"&enableApi=1&playerapiid=mydmplayer&autoplay=1&wmode=transparent";
+    swfobject.embedSWF(swfUrlStr, "dmapiplayer"+rand, width, height, "9", null, null, params, atts);
+}
+
+function play_dailymotion_homepage(selector, video_id) {
+    var params = { allowScriptAccess: "always", allowFullScreen:"true" };
+    var atts = { id: "mydmplayer", allowfullscreen:"true" };
+    // video_id= player_params.video_id;
+    var width = $(selector).width();
+    if($(selector).parent(".item").length > 0){
+        width = $(selector).parent(".item").width();
+    }
+
+    var height = $(selector).height();
+    if($(selector).parent(".item").length > 0){
+        height = $(selector).parent(".item").height();
+    }
+
+    $(selector).html('<div id="dmapiplayer"></div>');
+
+    swfUrlStr = site_config_js.SITE_SCHEME + "://www.dailymotion.com/swf/"+video_id+"&enableApi=1&playerapiid=dmplayer&autoplay=1";
+    swfobject.embedSWF(swfUrlStr, "dmapiplayer", width, height, "9", null, null, params, atts);
+}
